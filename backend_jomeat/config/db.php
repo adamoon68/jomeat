@@ -13,6 +13,9 @@ function getConnection()
     $dbPath = __DIR__ . '/../database/jomeat.db';
     $pdo = new PDO('sqlite:' . $dbPath);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_TIMEOUT, 10);
+    $pdo->exec('PRAGMA busy_timeout = 10000');
+    $pdo->exec('PRAGMA journal_mode = WAL');
     $pdo->exec('PRAGMA foreign_keys = ON');
     return $pdo;
 }

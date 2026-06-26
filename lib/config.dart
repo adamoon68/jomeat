@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String baseUrl = "http://192.168.0.135/backend_jomeat/api";
+  static const String baseUrl = "http://10.0.2.2/backend_jomeat/api";
 
   static String get serverRoot {
     const apiPath = '/backend_jomeat/api';

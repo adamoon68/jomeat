@@ -147,17 +147,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     return FoodCard(
                       food: food,
                       onTap: () => _openMenuForm(food: food),
+                      showPriceInSubtitle: true,
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'RM${food.price.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
                           IconButton(
                             tooltip: 'Edit item',
                             icon: const Icon(Icons.edit),

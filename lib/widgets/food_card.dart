@@ -7,12 +7,14 @@ class FoodCard extends StatelessWidget {
   final FoodItem food;
   final VoidCallback onTap;
   final Widget? trailing;
+  final bool showPriceInSubtitle;
 
   const FoodCard({
     super.key,
     required this.food,
     required this.onTap,
     this.trailing,
+    this.showPriceInSubtitle = false,
   });
 
   @override
@@ -50,13 +52,21 @@ class FoodCard extends StatelessWidget {
         title: Text(
           food.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(food.category),
+              Text(
+                showPriceInSubtitle
+                    ? '${food.category} | RM${food.price.toStringAsFixed(2)}'
+                    : food.category,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: 4),
               Text(
                 food.availability,
