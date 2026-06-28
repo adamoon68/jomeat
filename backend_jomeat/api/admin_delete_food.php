@@ -8,19 +8,28 @@ try {
     }
 
     $pdo = getConnection();
-    try {
-        $stmt = $pdo->prepare('DELETE FROM food_items WHERE food_id = ?');
-        $stmt->execute([$foodId]);
-        if ($stmt->rowCount() === 0) {
-            jsonResponse(false, 'Food item not found');
-        }
-        jsonResponse(true, 'Food item deleted successfully');
-    } catch (PDOException $deleteError) {
-        $update = $pdo->prepare('UPDATE food_items SET availability = ? WHERE food_id = ?');
-        $update->execute(['Unavailable', $foodId]);
-        jsonResponse(true, 'Food item is used in orders, so it was marked Unavailable');
+    $pdo->beginTransaction();
+
+    $existing = $pdo->prepare('SELECT food_id FROM food_items WHERE food_id = ?');
+    $existing->execute([$foodId]);
+
+    if (!$existing->fetch(PDO::FETCH_ASSOC)) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Food item not found');
     }
+
+    $deleteOrders = $pdo->prepare('DELETE FROM orders WHERE food_id = ?');
+    $deleteOrders->execute([$foodId]);
+
+    $deleteFood = $pdo->prepare('DELETE FROM food_items WHERE food_id = ?');
+    $deleteFood->execute([$foodId]);
+
+    $pdo->commit();
+    jsonResponse(true, 'Food item deleted successfully');
 } catch (PDOException $e) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     jsonResponse(false, 'Database error: ' . $e->getMessage());
 }
 ?>

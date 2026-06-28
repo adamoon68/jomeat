@@ -10,7 +10,9 @@ import '../services/api_service.dart';
 import '../widgets/custom_button.dart';
 
 class AdminMenuScreen extends StatefulWidget {
-  const AdminMenuScreen({super.key});
+  final FoodItem? initialFood;
+
+  const AdminMenuScreen({super.key, this.initialFood});
 
   @override
   State<AdminMenuScreen> createState() => _AdminMenuScreenState();
@@ -28,14 +30,15 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
   String _availability = 'Available';
   String? _selectedImagePath;
   FoodItem? _editingFood;
-  List<FoodItem> _foods = [];
-  bool _loading = true;
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _loadFoods();
+    final initialFood = widget.initialFood;
+    if (initialFood != null) {
+      _setEditingFood(initialFood);
+    }
   }
 
   @override
@@ -46,15 +49,6 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     _priceController.dispose();
     _prepController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadFoods() async {
-    final result = await ApiService.getMenu();
-    final data = result['success'] == true ? result['data'] as List : [];
-    setState(() {
-      _foods = data.map((item) => FoodItem.fromJson(item)).toList();
-      _loading = false;
-    });
   }
 
   Future<void> _pickAndCropImage() async {
@@ -99,17 +93,15 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     });
   }
 
-  void _editFood(FoodItem food) {
+  void _setEditingFood(FoodItem food) {
     _nameController.text = food.name;
     _descriptionController.text = food.description;
     _categoryController.text = food.category;
     _priceController.text = food.price.toStringAsFixed(2);
     _prepController.text = food.preparationTime.toString();
-    setState(() {
-      _availability = food.availability;
-      _selectedImagePath = null;
-      _editingFood = food;
-    });
+    _availability = food.availability;
+    _selectedImagePath = null;
+    _editingFood = food;
   }
 
   Future<void> _save() async {
@@ -152,7 +144,9 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
 
     if (result['success'] == true) {
       _clearForm();
-      _loadFoods();
+      if (editingFood != null) {
+        Navigator.pop(context, true);
+      }
     }
   }
 
@@ -360,84 +354,13 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
   }
 
-  Widget _buildPreviewList() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              'Current Menu Items',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          ..._foods.map(
-            (food) => Card(
-              child: ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: food.imageName.isEmpty
-                      ? Container(
-                          width: 52,
-                          height: 52,
-                          color: const Color(0xFFFFE3D2),
-                          child: const Icon(Icons.fastfood),
-                        )
-                      : Image.network(
-                          AppConfig.foodImageUrl(food.imageName),
-                          width: 52,
-                          height: 52,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                width: 52,
-                                height: 52,
-                                color: const Color(0xFFFFE3D2),
-                                child: const Icon(Icons.broken_image),
-                              ),
-                        ),
-                ),
-                title: Text(food.name),
-                subtitle: Text(
-                  '${food.category} | RM${food.price.toStringAsFixed(2)} | ${food.availability}',
-                ),
-                trailing: IconButton(
-                  tooltip: 'Edit item',
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _editFood(food),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Menu Items')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : LayoutBuilder(
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth > 820;
-                final form = _buildForm();
-                final previewList = _buildPreviewList();
-                return wide
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: form),
-                          Expanded(child: previewList),
-                        ],
-                      )
-                    : ListView(children: [form, previewList]);
-              },
-            ),
+      appBar: AppBar(
+        title: Text(_editingFood == null ? 'Create Item' : 'Edit Item'),
+      ),
+      body: ListView(children: [_buildForm()]),
     );
   }
 }

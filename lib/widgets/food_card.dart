@@ -6,8 +6,14 @@ import '../models/food_item.dart';
 class FoodCard extends StatelessWidget {
   final FoodItem food;
   final VoidCallback onTap;
+  final Widget? trailing;
 
-  const FoodCard({super.key, required this.food, required this.onTap});
+  const FoodCard({
+    super.key,
+    required this.food,
+    required this.onTap,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,10 +67,12 @@ class FoodCard extends StatelessWidget {
             ],
           ),
         ),
-        trailing: Text(
-          'RM${food.price.toStringAsFixed(2)}',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+        trailing:
+            trailing ??
+            Text(
+              'RM${food.price.toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
       ),
     );
   }
