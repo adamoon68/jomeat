@@ -51,7 +51,12 @@ try {
     $studentHash = password_hash('student123', PASSWORD_DEFAULT);
 
     $userStmt = $pdo->prepare(
-        'INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)'
+        'INSERT INTO users (name, email, password, role)
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(email) DO UPDATE SET
+            name = excluded.name,
+            password = excluded.password,
+            role = excluded.role'
     );
     $userStmt->execute(['Admin User', 'admin@jomeat.com', $adminHash, 'admin']);
     $userStmt->execute(['Student User', 'student@jomeat.com', $studentHash, 'student']);
@@ -63,17 +68,38 @@ try {
     );
 
     $foods = [
-        [1, 'Nasi Lemak', 'Rice with sambal, egg, cucumber and anchovies.', 'Main Meal', 4.50, 10, 'Available', 'nasi_lemak.jpg'],
-        [2, 'Chicken Rice', 'Steamed chicken rice served with soup and chili sauce.', 'Main Meal', 6.00, 12, 'Available', 'chicken_rice.jpg'],
-        [3, 'Mee Goreng', 'Fried noodles with vegetables and egg.', 'Main Meal', 5.00, 8, 'Available', 'mee_goreng.jpg'],
-        [4, 'Iced Milo', 'Cold chocolate malt drink.', 'Drink', 2.50, 3, 'Available', 'iced_milo.jpg'],
-        [5, 'Teh Ais', 'Iced milk tea.', 'Drink', 2.00, 3, 'Available', 'teh_ais.jpg'],
-        [6, 'Sandwich', 'Simple sandwich with egg and vegetables.', 'Snack', 3.50, 5, 'Available', 'sandwich.jpg']
+        [1, 'Nasi Lemak', 'Rice with sambal, egg, cucumber and anchovies.', 'Main Meal', 4.50, 10, 'Available', ''],
+        [2, 'Chicken Rice', 'Steamed chicken rice served with soup and chili sauce.', 'Main Meal', 6.00, 12, 'Available', ''],
+        [3, 'Mee Goreng', 'Fried noodles with vegetables and egg.', 'Main Meal', 5.00, 8, 'Available', ''],
+        [4, 'Iced Milo', 'Cold chocolate malt drink.', 'Drink', 2.50, 3, 'Available', ''],
+        [5, 'Teh Ais', 'Iced milk tea.', 'Drink', 2.00, 3, 'Available', ''],
+        [6, 'Sandwich', 'Simple sandwich with egg and vegetables.', 'Snack', 3.50, 5, 'Available', ''],
+        [7, 'Nasi Goreng Kampung', 'Spicy village-style fried rice with anchovies and vegetables.', 'Main Meal', 5.50, 10, 'Available', ''],
+        [8, 'Kuey Teow Goreng', 'Fried flat noodles with egg, vegetables and soy sauce.', 'Main Meal', 5.50, 9, 'Available', ''],
+        [9, 'Chicken Burger', 'Chicken patty burger with lettuce and special sauce.', 'Snack', 4.80, 7, 'Available', ''],
+        [10, 'French Fries', 'Crispy fried potatoes served hot.', 'Snack', 3.00, 5, 'Available', ''],
+        [11, 'Curry Puff', 'Pastry snack filled with potato curry.', 'Snack', 1.50, 4, 'Available', ''],
+        [12, 'Mineral Water', 'Bottled drinking water.', 'Drink', 1.20, 1, 'Available', ''],
+        [13, 'Orange Juice', 'Cold orange juice drink.', 'Drink', 3.00, 3, 'Available', ''],
+        [14, 'Chicken Nugget Set', 'Chicken nuggets served with chili sauce.', 'Snack', 4.00, 6, 'Available', '']
     ];
 
     foreach ($foods as $food) {
         $foodStmt->execute($food);
     }
+
+    $pdo->exec(
+        "UPDATE food_items
+         SET image_name = ''
+         WHERE image_name IN (
+            'nasi_lemak.jpg',
+            'chicken_rice.jpg',
+            'mee_goreng.jpg',
+            'iced_milo.jpg',
+            'teh_ais.jpg',
+            'sandwich.jpg'
+         )"
+    );
 
     echo "JomEat database setup completed.\n";
     echo "Database file: " . $dbPath . "\n";

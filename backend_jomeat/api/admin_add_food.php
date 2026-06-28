@@ -16,12 +16,13 @@ try {
         jsonResponse(false, 'Invalid availability');
     }
 
+    $imageName = uploadFoodImage(true);
     $pdo = getConnection();
     $stmt = $pdo->prepare(
-        'INSERT INTO food_items (name, description, category, price, preparation_time, availability)
-         VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO food_items (name, description, category, price, preparation_time, availability, image_name)
+         VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$name, $description, $category, $price, $preparationTime, $availability]);
+    $stmt->execute([$name, $description, $category, $price, $preparationTime, $availability, $imageName]);
     jsonResponse(true, 'Food item added successfully');
 } catch (PDOException $e) {
     jsonResponse(false, 'Database error: ' . $e->getMessage());

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../config.dart';
 import '../models/food_item.dart';
 import '../services/api_service.dart';
 import '../services/session_service.dart';
@@ -21,6 +22,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   int _quantity = 1;
   bool _loading = true;
   bool _ordering = false;
+  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -35,12 +37,14 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   }
 
   Future<void> _loadFood() async {
+    final isAdmin = await SessionService.isAdmin();
     final result = await ApiService.getFoodDetail(widget.foodId);
     if (mounted) {
       setState(() {
         _food = result['success'] == true
             ? FoodItem.fromJson(result['data'])
             : null;
+        _isAdmin = isAdmin;
         _loading = false;
       });
       if (result['success'] != true) {
@@ -84,6 +88,36 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(18),
                 children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: food.imageName.isEmpty
+                        ? Container(
+                            height: 210,
+                            color: const Color(0xFFFFE3D2),
+                            child: const Icon(
+                              Icons.fastfood,
+                              size: 72,
+                              color: Color(0xFFE66A2C),
+                            ),
+                          )
+                        : Image.network(
+                            AppConfig.foodImageUrl(food.imageName),
+                            height: 210,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  height: 210,
+                                  color: const Color(0xFFFFE3D2),
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    size: 72,
+                                    color: Color(0xFFE66A2C),
+                                  ),
+                                ),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
                   Text(
                     food.name,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -108,42 +142,47 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      const Text('Quantity'),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: _quantity > 1
-                            ? () => setState(() => _quantity--)
-                            : null,
-                      ),
-                      Text('$_quantity', style: const TextStyle(fontSize: 18)),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () => setState(() => _quantity++),
-                      ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: _notesController,
-                    decoration: const InputDecoration(
-                      labelText: 'Order notes, for example less spicy',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 18),
-                  _ordering
-                      ? const Center(child: CircularProgressIndicator())
-                      : CustomButton(
-                          text: 'Pre-order',
-                          icon: Icons.shopping_bag,
-                          onPressed: food.availability == 'Available'
-                              ? _order
+                  if (!_isAdmin) ...[
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        const Text('Quantity'),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          onPressed: _quantity > 1
+                              ? () => setState(() => _quantity--)
                               : null,
                         ),
+                        Text(
+                          '$_quantity',
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          onPressed: () => setState(() => _quantity++),
+                        ),
+                      ],
+                    ),
+                    TextFormField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Order notes, for example less spicy',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 18),
+                    _ordering
+                        ? const Center(child: CircularProgressIndicator())
+                        : CustomButton(
+                            text: 'Pre-order',
+                            icon: Icons.shopping_bag,
+                            onPressed: food.availability == 'Available'
+                                ? _order
+                                : null,
+                          ),
+                  ],
                 ],
               ),
             ),

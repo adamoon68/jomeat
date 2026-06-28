@@ -27,6 +27,28 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> _multipartPost(
+    String endpoint,
+    Map<String, String> fields, {
+    String? imagePath,
+  }) async {
+    try {
+      final request = http.MultipartRequest('POST', _url(endpoint));
+      request.fields.addAll(fields);
+      if (imagePath != null && imagePath.isNotEmpty) {
+        request.files.add(
+          await http.MultipartFile.fromPath('image', imagePath),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (error) {
+      return _connectionError(error);
+    }
+  }
+
   static Future<Map<String, dynamic>> registerUser({
     required String name,
     required String email,
@@ -105,15 +127,16 @@ class ApiService {
     required String price,
     required String preparationTime,
     required String availability,
+    required String imagePath,
   }) {
-    return _post('admin_add_food.php', {
+    return _multipartPost('admin_add_food.php', {
       'name': name,
       'description': description,
       'category': category,
       'price': price,
       'preparation_time': preparationTime,
       'availability': availability,
-    });
+    }, imagePath: imagePath);
   }
 
   static Future<Map<String, dynamic>> adminUpdateFood({
@@ -124,8 +147,9 @@ class ApiService {
     required String price,
     required String preparationTime,
     required String availability,
+    String? imagePath,
   }) {
-    return _post('admin_update_food.php', {
+    return _multipartPost('admin_update_food.php', {
       'food_id': foodId.toString(),
       'name': name,
       'description': description,
@@ -133,7 +157,7 @@ class ApiService {
       'price': price,
       'preparation_time': preparationTime,
       'availability': availability,
-    });
+    }, imagePath: imagePath);
   }
 
   static Future<Map<String, dynamic>> adminDeleteFood(int foodId) {

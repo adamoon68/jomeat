@@ -10,6 +10,9 @@ JomEat is a simple full-stack mobile app for student cafeteria food pre-orders. 
 - Food detail page with quantity and notes
 - Pre-order creation, order history, update, and cancellation
 - Admin menu CRUD for food items
+- Food item images on menu cards and detail pages
+- Admin image upload and crop when adding or updating food
+- Uploaded image paths saved in the `food_items.image_name` database column
 - JSON PHP API using PDO SQLite
 
 ## Tools Used
@@ -18,6 +21,8 @@ JomEat is a simple full-stack mobile app for student cafeteria food pre-orders. 
 - PHP API
 - SQLite database
 - `http` package
+- `image_picker` package
+- `image_cropper` package
 - `shared_preferences` package
 
 ## Run The Backend
@@ -30,6 +35,8 @@ JomEat is a simple full-stack mobile app for student cafeteria food pre-orders. 
    `http://localhost/backend_jomeat/database/setup_database.php`
 4. Test menu API:
    `http://localhost/backend_jomeat/api/get_menu.php`
+5. Make sure PHP can write uploaded images to:
+   `C:\xampp\htdocs\assets\images`
 
 ## Run The Flutter App
 
@@ -61,10 +68,12 @@ JomEat is a simple full-stack mobile app for student cafeteria food pre-orders. 
 
 1. Login as the sample admin.
 2. Tap `Admin Menu`.
-3. Fill the form and tap `Add Food`.
-4. Tap an existing menu item to load it into the form.
-5. Edit details and tap `Update Food`.
-6. Tap the delete icon to delete a food item. If it is already used in orders, the API marks it `Unavailable`.
+3. Fill the form.
+4. Tap `Upload food image`, choose an image, crop it, then save.
+5. Tap `Add Food`.
+6. Tap an existing menu item to load it into the form.
+7. Edit details or tap `Change food image`, then tap `Update Food`.
+8. Tap the delete icon to delete a food item. If it is already used in orders, the API marks it `Unavailable`.
 
 ## Common Errors And Fixes
 
@@ -72,6 +81,6 @@ JomEat is a simple full-stack mobile app for student cafeteria food pre-orders. 
 - Android emulator cannot use `localhost`: use `10.0.2.2`.
 - Real phone cannot use `10.0.2.2`: use your computer LAN IP, for example `http://192.168.1.10/backend_jomeat/api`.
 - SQLite permission error: make sure the PHP server can write to `backend_jomeat/database`.
+- Image upload error: make sure the PHP server can write to `assets/images`.
+- Image not showing: confirm `baseUrl` is correct and the uploaded image exists in `assets/images`.
 - Empty menu: run `setup_database.php` once and check that `backend_jomeat/database/jomeat.db` exists.
-
-A new Flutter project.

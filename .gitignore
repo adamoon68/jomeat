@@ -33,6 +33,11 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Runtime-uploaded food images
+/backend_jomeat/uploads/
+/assets/images/*
+!/assets/images/.gitkeep
+
 # Symbolication related
 app.*.symbols
 

@@ -18,16 +18,32 @@ try {
     }
 
     $pdo = getConnection();
-    $stmt = $pdo->prepare(
-        'UPDATE food_items
-         SET name = ?, description = ?, category = ?, price = ?, preparation_time = ?, availability = ?
-         WHERE food_id = ?'
-    );
-    $stmt->execute([$name, $description, $category, $price, $preparationTime, $availability, $foodId]);
+    $existing = $pdo->prepare('SELECT image_name FROM food_items WHERE food_id = ?');
+    $existing->execute([$foodId]);
+    $food = $existing->fetch(PDO::FETCH_ASSOC);
 
-    if ($stmt->rowCount() === 0) {
-        jsonResponse(false, 'Food item not found or no changes made');
+    if (!$food) {
+        jsonResponse(false, 'Food item not found');
     }
+
+    $imageName = uploadFoodImage(false);
+
+    if ($imageName === null) {
+        $stmt = $pdo->prepare(
+            'UPDATE food_items
+             SET name = ?, description = ?, category = ?, price = ?, preparation_time = ?, availability = ?
+             WHERE food_id = ?'
+        );
+        $stmt->execute([$name, $description, $category, $price, $preparationTime, $availability, $foodId]);
+    } else {
+        $stmt = $pdo->prepare(
+            'UPDATE food_items
+             SET name = ?, description = ?, category = ?, price = ?, preparation_time = ?, availability = ?, image_name = ?
+             WHERE food_id = ?'
+        );
+        $stmt->execute([$name, $description, $category, $price, $preparationTime, $availability, $imageName, $foodId]);
+    }
+
     jsonResponse(true, 'Food item updated successfully');
 } catch (PDOException $e) {
     jsonResponse(false, 'Database error: ' . $e->getMessage());

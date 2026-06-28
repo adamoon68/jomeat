@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../services/session_service.dart';
-import 'home_screen.dart';
+import 'admin_home_screen.dart';
 import 'login_screen.dart';
+import 'student_home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,11 +22,16 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkSession() async {
     await Future.delayed(const Duration(seconds: 1));
     final loggedIn = await SessionService.isLoggedIn();
+    final isAdmin = await SessionService.isAdmin();
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => loggedIn ? const HomeScreen() : const LoginScreen(),
+        builder: (_) => !loggedIn
+            ? const LoginScreen()
+            : isAdmin
+            ? const AdminHomeScreen()
+            : const StudentHomeScreen(),
       ),
     );
   }

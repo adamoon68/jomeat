@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/session_service.dart';
 import '../widgets/custom_button.dart';
-import 'home_screen.dart';
+import 'admin_home_screen.dart';
 import 'register_screen.dart';
+import 'student_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,10 +43,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result['success'] == true) {
       await SessionService.saveUserSession(result['data']);
+      final isAdmin = await SessionService.isAdmin();
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (_) =>
+              isAdmin ? const AdminHomeScreen() : const StudentHomeScreen(),
+        ),
       );
     }
   }
