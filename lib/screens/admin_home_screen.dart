@@ -68,7 +68,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           _loadData();
         },
         icon: const Icon(Icons.add),
-        label: const Text('Create Item'),
+        label: const Text('Create/Edit Item'),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -91,12 +91,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
-                        child: _InfoCard(
-                          label: 'Admin Access',
-                          value: 'Create Only',
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 18),
